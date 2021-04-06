@@ -5,10 +5,10 @@ Map creation script
 """
 import sys
 import os
-from ConfigParser import ConfigParser
+from configparser import ConfigParser
 import math
 from PIL import Image
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 def deg2num(lat_deg, lon_deg, zoom):
     lat_rad = math.radians(lat_deg)
@@ -37,7 +37,7 @@ tilestore = p.get(name,'tilestore')
 # parse bounding box
 txt = p.get(name,'bbox')
 c = [float(v) for v in txt.split('"')[1::2]]
-bbox = dict(zip(['e','n','s','w'], c))
+bbox = dict(list(zip(['e','n','s','w'], c)))
 
 if not os.path.exists(tilestore):
     os.makedirs(tilestore)
@@ -53,7 +53,7 @@ for x in range(top_left[0], bottom_right[0]):
     for y in range(top_left[1], bottom_right[1]):
         tiles.append((zoom,x,y))
         
-print 'Nr tiles: ', len(tiles)
+print('Nr tiles: ', len(tiles))
 
 
 # download tiles and make map
@@ -68,17 +68,18 @@ for idx,tile in enumerate(tiles):
     zoom,x,y = tile
     fName = '_'.join([str(f) for f in tile]) + '.png'
     fName = os.path.join(tilestore, fName)
-    print '[%i/%i] %s' % (idx+1,len(tiles),fName),
+    print('[%i/%i] %s' % (idx+1,len(tiles),fName), end=' ')
     if not os.path.exists(fName):
         url = source.format(*tile)
-        urllib.urlretrieve(url,fName)
-        print ' ok'
+        print(f'Requesting {url}    ', end='')
+        urllib.request.urlretrieve(url,fName)
+        print(' ok')
     else:
-        print ' cached'
+        print(' cached')
         
     # paste
     tmp = Image.open(fName)
     img.paste(tmp, (256 * (x - top_left[0]), 256 * (y - top_left[1])))
     
-print 'Saving to ', dest
+print('Saving to ', dest)
 img.save(dest, "JPEG")

@@ -10,6 +10,8 @@ import math
 from PIL import Image
 import urllib.request, urllib.parse, urllib.error
 
+
+# tile positions, see https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Lon..2Flat._to_tile_numbers_2
 def deg2num(lat_deg, lon_deg, zoom):
     lat_rad = math.radians(lat_deg)
     n = 2.0 ** zoom
